@@ -1,0 +1,104 @@
+/*
+ * ############################################################################
+ * ## (Description)
+ * ##    Imake file for Anlib: C++ analysis library
+ * ## (Update Record)
+ * ##    99/05/22  K.Fujii     Original version.
+ * ##    01/08/01  K.Ikematsu  Fixed dependency check for
+ * ##                          generating dictionary.
+ * ##
+ * ## $Id$
+ * ############################################################################
+ *
+ */
+
+/* Template Files */
+
+#include "conf/makejsf.tmpl"
+
+/* Package Name */
+
+INSTALLDIR	= ..
+LIBINSTALLDIR	= $(INSTALLDIR)/lib
+INCINSTALLDIR	= $(INSTALLDIR)/include
+LIBNAME		= Anlib
+SOREV           = 2004a
+SONAME		= lib$(LIBNAME).$(SOEXT).$(SOREV)
+ANLSOLIB	= $(SONAME)
+
+#if defined(DarwinArchitecture)
+ANLDYLIB	= lib$(LIBNAME).$(DylibSuf).$(SOREV)
+#else
+ANLDYLIB	=
+#endif
+
+/* Headers */
+
+INCPATH	= -I. -I$(SATELLITESROOT)/include
+CXXFLAGS += $(INCPATH)
+
+/* Routines to compile */
+
+OBJS		= ANLJetFinder.$(ObjSuf) \
+		  ANLEventShape.$(ObjSuf) \
+		  ANLPairCombiner.$(ObjSuf) \
+		  ANL2DVector.$(ObjSuf) \
+		  ANL3DVector.$(ObjSuf) \
+		  ANL4DVector.$(ObjSuf) \
+		  ANL2DSpline.$(ObjSuf)
+
+/* You don't have to edit anything below here */
+
+DICTNAME	= $(LIBNAME)Dict
+
+ALLOBJS 	= $(OBJS) $(DICTNAME).$(ObjSuf)
+
+SRCS		= $(subst .$(ObjSuf),.$(SrcSuf),$(ALLOBJS))
+
+HDRS		= $(subst .$(ObjSuf),.h,$(OBJS))
+
+INSTALLFLAGS   := -C
+
+/* Make Targets */
+
+all:: $(ANLSOLIB) $(ANLDYLIB)
+
+$(ANLSOLIB): $(ALLOBJS)
+	$(LD) -o $@ $(SOFLAGS) $(ALLOBJS)
+	$(RM) $(subst .$(SOREV),,$@)
+	$(LN) $@ $(subst .$(SOREV),,$@)
+
+#if defined(DarwinArchitecture)
+$(ANLDYLIB): $(ALLOBJS)
+	$(LD) -o $@ $(DYLDFLAGS) $(ALLOBJS)
+	$(RM) $(subst .$(SOREV),,$@)
+	$(LN) $@ $(subst .$(SOREV),,$@)
+
+install:: $(ANLDYLIB)
+	$(MKDIRHIER) $(DESTDIR)$(LIBINSTALLDIR)
+	$(INSTALL) $(INSTALLFLAGS) $(ANLDYLIB) $(LIBINSTALLDIR)
+	$(LN) $(subst .$(SOREV),,$(ANLDYLIB)) \
+		$(LIBINSTALLDIR)/$(subst .$(SOREV),,$(ANLDYLIB))
+#endif
+
+InstallSharedLibrary($(LIBNAME),$(SOREV),$(LIBINSTALLDIR))
+
+InstallMultipleFlags($(HDRS),$(INCINSTALLDIR),-m 644)
+
+$(DICTNAME).$(ObjSuf): $(DICTNAME).$(SrcSuf)
+
+clean::
+	@rm -f *.$(ObjSuf) core $(DICTNAME).$(SrcSuf) $(DICTNAME).h
+
+depend:: $(SRCS) $(HDRS)
+	for i in $(SRCS); do \
+	rmkdepend -a -- $(CXXFLAGS) $(INCPATH) $(DEPENDFILES) -- $$i; done
+
+distclean:: clean
+	@rm -f $(ANLSOLIB) *.$(SOEXT) Makefile *.$(DylibSuf).* *.$(DylibSuf)
+	@rm -f *.root *.tdr *.out *~ core
+
+$(DICTNAME).$(SrcSuf): $(HDRS) LinkDef.h
+	@echo "Generating dictionary ..."
+	rootcint -f $(DICTNAME).$(SrcSuf) \
+ 		-c $(RCINTDEFINES) $(INCPATH) $(HDRS) LinkDef.h
