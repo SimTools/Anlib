@@ -23,6 +23,7 @@
 //
 #include "TClass.h"
 #include "TObjArray.h"
+#include "TString.h"
 #include <iostream>
 #include "ANL4DVector.h"
 
@@ -60,7 +61,7 @@ public:
    }
    virtual ~ANLPair() {}
    
-   TObject         *operator[](Int_t i) const { return  fP[i]; }
+   TObject     *operator[](Int_t i) const { return  fP[i]; }
    ANL4DVector  operator()(Int_t i) const { return *(ANL4DVector *)fP[i]; }
    ANL4DVector  operator()()        const { return *(ANL4DVector *)this;  }
 
@@ -81,8 +82,8 @@ public:
    	       ANL4DVector::IsLocked();
    }
 
-   inline void SetQuality(Double_t q) { fQuality = q; }
-   inline Double_t GetQuality() const { return fQuality; }
+   inline void     SetQuality(Double_t q) { fQuality = q;    }
+   inline Double_t GetQuality()     const { return fQuality; }
    
    Bool_t IsSortable() const { return kTRUE; }
    Int_t  Compare(const TObject *obj) const
@@ -96,7 +97,8 @@ public:
    
    void DebugPrint(const Char_t *opt = "Brief") const
    {
-   	if (opt == "Brief") {
+        TString option = opt;
+   	if (option.Contains("Brief")) {
            cerr << (void *)this << ": ";
  	   cerr << " item 0: " << (void *)fP[0]
   	        << (((ANL4DVector *)fP[0])->IsLocked() ? ":locked" : "       ")
