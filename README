@@ -40,7 +40,8 @@ UpdateRecord:
   1999/08/01	K.Fujii	(v.0.1) original very primitive version for test use.
 
 Installation:
-		$ export KFLIBROOT=`(cd ..; pwd)`
+		$ export ANLIBROOT=`(cd ..; pwd)`
+		$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ANLIBROOT/lib
 		$ make
 
 Examples:	see sample programs in the examplers directory.

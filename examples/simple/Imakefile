@@ -37,7 +37,7 @@ SRCS		= $(subst .$(ObjSuf),.$(SrcSuf),$(OBJS))
 
 JSFPROGRAM	= $(PACKAGENAME)
 
-ANLLIB		= -L../../src -lAnlib -L$(SATELLITESROOT)/lib -lS4Utils
+ANLLIB		= -L../../lib -lAnlib -L$(SATELLITESROOT)/lib -lS4Utils
 
 /*
  * Make Targets
